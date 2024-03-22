@@ -63,6 +63,24 @@ export class Database {
            
         return -1;
     }
+
+    /**
+     * Returns the users email.
+     * 
+     * @param id The id of the user
+     * @returns The email of the user
+     */
+    async getUserEmail(id: number): Promise<string | undefined> {
+        let res = await this.client.query('SELECT email FROM users \
+            WHERE id = $1::integer', [id]);
+        
+        let row = res.rows[0];
+        if (row) {
+            return row.email;
+        }
+           
+        return undefined;
+    }
 }
 
 let _db: Database;

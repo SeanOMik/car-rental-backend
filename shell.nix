@@ -3,7 +3,7 @@ let
 in
   with nixpkgs;
   stdenv.mkDerivation rec {
-    name = "lyra_engine_dev";
+    name = "car-rental-backend";
     nativeBuildInputs = [
       nodejs_21
       nodePackages.npm
