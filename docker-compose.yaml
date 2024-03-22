@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./dbTest:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    restart: unless-stopped

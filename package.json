@@ -6,23 +6,33 @@
   "scripts": {
     "start:dev": "npx nodemon",
     "build": "rimraf ./build && tsc",
-    "start": "npm run build && node build/main.js"
+    "start": "npm run build && node build/main.js",
+    "migrate": "node-pg-migrate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
+    "@types/http-status-codes": "^1.2.0",
     "@types/node": "^20.11.30",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.1",
-    "node": "^21.7.1",
+    "@types/pg": "^8.11.4",
     "nodemon": "^3.1.0",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.1",
+    "express-validator": "^7.0.1",
+    "http-status-codes": "^2.3.0",
+    "node": "^21.7.1",
+    "node-pg-migrate": "^6.2.2",
+    "pg": "^8.11.3",
     "typescript": "^5.4.3"
   }
 }
