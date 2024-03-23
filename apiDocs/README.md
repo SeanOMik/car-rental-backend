@@ -100,19 +100,26 @@ A status code of `409` signifies that there is already a user with the same emai
 The base location path is `/api/v1/location`
 
 ### Get vehicles at a location
-POST `/:locationId/vehicles`\
+GET `/:locationId/vehicles`\
 Response: 200 OK, with `Vehicles[]` JSON body.
 
 #### 404 NOT_FOUND
 The location was not found.
 
 ### List locations
-POST `/`\
+GET `/`\
 Response: 200 OK, with `Location[]` JSON body.
 
 ### Get the address of a location
-POST `/:locationId`\
-Response: 200 OK, with `Location` JSON body. (Location struct has the address field)
+GET `/:locationId`\
+Response: 200 OK, with `Location` JSON body (location struct has the address field).
 
 #### 404 NOT_FOUND
+The location was not found.
+
+### Add a vehicle to a location
+GET `/:locationId/vehicles`\
+Response: 200 OK, with `Vechicle` JSON body (can be used to retrieve its unique id).
+
+#### 404 NOT FOUND
 The location was not found.
