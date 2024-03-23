@@ -23,6 +23,12 @@
     npm run migrate up
     ```
 
+5. Now you're ready to run the app in developer mode:
+
+    ```shell
+    npm run start:dev
+    ```
+
 ## Project Structure
 
 Database migrations are used to keep the database as clean as possible and without having to destroy data between database updates. To see how to create a migration see the docs of [node-pg-migrate](https://www.npmjs.com/package/node-pg-migrate). All data for a request is validated using tools from [express-validator](https://express-validator.github.io/docs/api/matched-data/).
