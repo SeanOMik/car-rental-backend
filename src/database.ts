@@ -2,9 +2,10 @@
 import * as bcrypt from "bcrypt";
 import { Client, ClientConfig } from "pg";
 import { User, UserType } from "./user";
+import { Vehicle } from "./vehicle";
+import { Location } from "./location";
 
-//const bcrypt = require("bcrypt");
-
+// the amount of salting rounds for encrypting passwords
 const saltRounds = 10;
 
 export class Database {
@@ -92,8 +93,7 @@ export class Database {
      */
     async getUserEmail(id: number): Promise<string | undefined> {
         let res = await this.client.query(
-            "SELECT email FROM users \
-            WHERE id = $1::integer",
+            "SELECT email FROM users WHERE id = $1::integer",
             [id],
         );
 
@@ -103,6 +103,145 @@ export class Database {
         }
 
         return undefined;
+    }
+
+    private vehicleFromRow(row: any): Vehicle {
+        let v = new Vehicle(
+            row.id,
+            row.make,
+            row.model,
+            row.year,
+            row.axles,
+            row.doors,
+            row.body_type,
+            row.rent_cost_per_day,
+            row.color,
+            row.is_rented,
+        );
+        v.locationId = row.location_id;
+        return v;
+    }
+
+    /**
+     * Retrieve a vehicle from its id.
+     *
+     * @param id The id of the vehicle.
+     * @returns The vehicle, or undefined if not found.
+     */
+    async getVehicle(id: number): Promise<Vehicle | undefined> {
+        let res = await this.client.query(
+            "SELECT * FROM vehicle WHERE id = $1::integer",
+            [id],
+        );
+
+        let row = res.rows[0];
+        if (row) {
+            let v = this.vehicleFromRow(row);
+            return v;
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Create a new vehicle in the database, returning its unique id.
+     *
+     * @param vehicle The vehicle to add to the database.
+     * @returns The id of the new vehicle.
+     */
+    async newVehicle(vehicle: Vehicle): Promise<number> {
+        let vehLocStr = vehicle.locationId
+            ? vehicle.locationId.toString()
+            : "NULL";
+
+        let res = await this.client.query(
+            "INSERT INTO vehicle(make, location_id, model, year, doors, body_type, \
+                axles, rent_cost_per_day, color, is_rented) \
+                VALUES($1::text, $2, $3::text, $4::int, $5::int, $6::text, $7::int, \
+                    $8::float, $9::text, $10) RETURNING id",
+            [
+                vehicle.make,
+                vehLocStr,
+                vehicle.model,
+                vehicle.year.toString(),
+                vehicle.doors.toString(),
+                vehicle.bodyType,
+                vehicle.axles.toString(),
+                vehicle.rentCostPerDay.toString(),
+                vehicle.color,
+                vehicle.isRented.toString(),
+            ],
+        );
+
+        return res.rows[0].id;
+    }
+
+    /**
+     * Get a location from an id
+     * 
+     * @param locationId The id of the location
+     * @returns The location, or undefined if it wasn't found
+     */
+    async getLocation(locationId: number): Promise<Location | undefined> {
+        let res = await this.client.query(
+            "SELECT address FROM location WHERE id = $1::integer",
+            [locationId],
+        );
+
+        let row = res.rows[0];
+        if (row) {
+            return new Location(locationId, row.address);
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Get the vehicles at a location.
+     * 
+     * @param locationId The id of the location to get vehicles from.
+     * @returns An array of vehicles that are currently at the location, or undefined if the location was not found
+     */
+    async getLocationVehicles(locationId: number, includeRented: boolean): Promise<Vehicle[] | undefined> {
+        if (this.getLocation(locationId) == undefined) {
+            return undefined;
+        }
+
+        let res;
+        if (includeRented) {
+            res = await this.client.query(
+                "SELECT * FROM vehicles WHERE locationId = $1::integer",
+                [locationId],
+            );
+        } else {
+            res = await this.client.query(
+                "SELECT * FROM vehicles WHERE locationId = $1::integer AND is_rented = false",
+                [locationId],
+            );
+        }
+
+        let vehicles = [];
+        for (let row of res.rows) {
+            vehicles.push(this.vehicleFromRow(row));
+        }
+
+        return vehicles;
+    }
+
+    /**
+     * Get all locations.
+     * 
+     * @returns An array of locations.
+     */
+    async getLocations(): Promise<Location[]> {
+        let res = await this.client.query("SELECT * FROM location");
+
+        let locs = [];
+        for (let row of res.rows) {
+            locs.push(new Location(parseInt(row.id), row.address))
+        }
+
+        return locs;
     }
 }
 
