@@ -11,7 +11,7 @@ import { initDb } from "./database";
 import bodyParser from "body-parser";
 import { StatusCodes } from "http-status-codes";
 import session from "express-session";
-import User from "./user";
+import { User } from "./user";
 import cors from "cors";
 
 declare module "express-session" {

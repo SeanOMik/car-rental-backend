@@ -2,7 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import { getDb } from "../database";
 import { body, matchedData, validationResult } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import User from "../user";
+import { User, UserType } from "../user";
 
 let router = Router();
 
@@ -19,10 +19,10 @@ router.post(
             const data = matchedData(req);
 
             let db = getDb();
-            let id = await db.loginUser(data.email, data.password);
+            let user = await db.loginUser(data.email, data.password);
 
             // loginUser returns -1 if there is another user with the same email
-            if (id == -1) {
+            if (!user) {
                 return res.status(StatusCodes.NOT_FOUND).send({
                     status: StatusCodes.NOT_FOUND,
                     message: "Incorrect username or password",
@@ -30,11 +30,10 @@ router.post(
             }
 
             // update session
-            let user = new User(id, data.email);
             req.session.user = user;
             req.session.save();
 
-            return res.send({ user_id: id.toString() });
+            return res.send(user);
         }
 
         return res
@@ -56,15 +55,15 @@ router.post(
             const data = matchedData(req);
 
             let db = getDb();
-            let id = await db.registerUser(data.email, data.password);
+            let id = await db.registerUser(data.email, data.password, UserType.Customer);
 
             if (id) {
                 // update session
-                let user = new User(id, data.email);
+                let user = new User(id, data.email, UserType.Customer);
                 req.session.user = user;
                 req.session.save();
 
-                return res.send({ user_id: id.toString() });
+                return res.send({ user_id: id.toString(), user_type: UserType.Customer });
             } else {
                 // registerUser returns undefined if there is another user with the same email
                 return res.status(StatusCodes.CONFLICT).send({
