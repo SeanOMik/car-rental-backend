@@ -12,6 +12,7 @@ import bodyParser from "body-parser";
 import { StatusCodes } from "http-status-codes";
 import session from "express-session";
 import User from "./user";
+import cors from "cors";
 
 declare module "express-session" {
     interface SessionData {
@@ -25,6 +26,8 @@ dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
+
+app.use(cors());
 
 app.use(bodyParser.json()); // setup express-validator
 setupExpressSession(app);
