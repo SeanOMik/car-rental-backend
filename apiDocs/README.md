@@ -27,6 +27,26 @@ Response from [`/user/login`](#post-userlogin):
 }
 ```
 
+### Location
+|Field name|Type|Description|
+|---|---|---|
+|uid|`uint`|The integer unique id of the location.|
+|address|`string`|The address that the renting location is at.|
+
+### Vehicle
+|Field name|Type|Description|
+|---|---|---|
+|uid|`uint`|The integer unique id of the vehicle.|
+|make|`string`| |
+|model|`string`| |
+|year|`int`| |
+|axles|`int`|The number of axles the vehicle has.|
+|doors|`int`|The number of doors that the vehicle has|
+|bodyType|`string`|The type of the vehicle (i.e., sedan, coupe, truck, etc.)|
+|rentCostPerDay|`float`| |
+|color|`string`| |
+|isRented|`boolean`| |
+
 ### UserType
 This is an enum, not a structure
 
@@ -36,10 +56,11 @@ This is an enum, not a structure
 |Vendor|`1`|This accounts belongs to a vendor user account.|
 
 ## User paths
+The base location path is `/api/v1/user`
 
-### POST `/user/login`
-
-JSON Payload:
+### User login
+POST `/user/login`\
+Request JSON body:
 
 ```json
 {
@@ -56,9 +77,9 @@ A cookie named `connect.sid` will be returned in the `Set-Cookie` header. The va
 ##### 409 CONFLICT
 A status code of `404` signifies that the email and/or password is incorrect.
 
-### POST `/user/register`
-
-JSON Payload:
+### User register
+POST `/user/register`\
+Request JSON body:
 
 ```json
 {
@@ -74,3 +95,24 @@ A cookie named `connect.sid` will be returned in the `Set-Cookie` header. The va
 
 ##### 409 CONFLICT
 A status code of `409` signifies that there is already a user with the same email created.
+
+## Location paths
+The base location path is `/api/v1/location`
+
+### Get vehicles at a location
+POST `/:locationId/vehicles`\
+Response: 200 OK, with `Vehicles[]` JSON body.
+
+#### 404 NOT_FOUND
+The location was not found.
+
+### List locations
+POST `/`\
+Response: 200 OK, with `Location[]` JSON body.
+
+### Get the address of a location
+POST `/:locationId`\
+Response: 200 OK, with `Location` JSON body. (Location struct has the address field)
+
+#### 404 NOT_FOUND
+The location was not found.
