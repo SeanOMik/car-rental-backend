@@ -13,7 +13,7 @@ exports.up = pgm => {
         location_id: {
             type: "integer",
             notNull: false,
-            references: '"locations"',
+            references: '"location"',
         },
         make: { type: "varchar(30)", notNull: true },
         model: { type: "varchar(30)", notNull: true },
