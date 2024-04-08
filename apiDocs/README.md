@@ -102,24 +102,40 @@ The base location path is `/api/v1/location`
 ### Get vehicles at a location
 GET `/:locationId/vehicles`\
 Response: 200 OK, with `Vehicles[]` JSON body.
+Requires authentication: `True`
 
 #### 404 NOT_FOUND
 The location was not found.
+
+#### 401 UNAUTHORIZED
+No authentication was received or the session is invalid
 
 ### List locations
 GET `/`\
 Response: 200 OK, with `Location[]` JSON body.
+Requires authentication: `True`
+
+#### 401 UNAUTHORIZED
+No authentication was received or the session is invalid
 
 ### Get the address of a location
 GET `/:locationId`\
 Response: 200 OK, with `Location` JSON body (location struct has the address field).
+Requires authentication: `True`
 
 #### 404 NOT_FOUND
 The location was not found.
 
+#### 401 UNAUTHORIZED
+No authentication was received or the session is invalid
+
 ### Add a vehicle to a location
 GET `/:locationId/vehicles`\
 Response: 200 OK, with `Vechicle` JSON body (can be used to retrieve its unique id).
+Requires authentication: `True`, requires Vendor user account type
 
 #### 404 NOT FOUND
 The location was not found.
+
+#### 401 UNAUTHORIZED
+No authentication was received, the session is invalid, or they were not logged into a vendor account.
