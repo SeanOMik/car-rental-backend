@@ -177,6 +177,29 @@ export class Database {
     }
 
     /**
+     * Create a new location in the database, returning its unique id.
+     *
+     * @param location The location to add to the database.
+     * @returns The id of the new location.
+     */
+    async newLocation(location: Location): Promise<number> {
+        let locStr = location.uid
+            ? location.uid.toString()
+            : "NULL";
+
+        let res = await this.client.query(
+            "INSERT INTO location(uid, address) \
+                VALUES($1::int, $2::text) RETURNING uid",
+            [
+                location.uid,
+                location.address
+            ],
+        );
+
+        return res.rows[0].uid;
+    }
+
+    /**
      * Get a location from an id
      * 
      * @param locationId The id of the location
