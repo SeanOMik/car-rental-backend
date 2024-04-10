@@ -262,6 +262,32 @@ export class Database {
 
         return locs;
     }
+
+    /**
+     * Rent a vehicle for a specified amount of days.
+     * 
+     * @param vehicleId The id of the vehicle to rent.
+     * @param renterUserId The id of the user that is renting the vehicle.
+     * @param lengthDays The length in days that the rent will be for.
+     * @param startDate The start of the rent, defaults to now.
+     */
+    async rentVehicle(vehicleId: number, renterUserId: number, lengthDays: number, startDate: Date = new Date(Date.now())) {
+        await this.client.query("INSERT INTO rent_requests(vehicle_id, renter_user_id, start_date, length_days) \
+            VALUES($1::int, $2::string, $2::int)",
+            [
+                vehicleId.toString(),
+                renterUserId.toString(),
+                startDate.toISOString(),
+                lengthDays.toString()
+            ]
+        );
+
+        await this.client.query("UPDATE vehicle SET is_rented = true WHERE id = $1::int",
+            [
+                vehicleId.toString(),
+            ]
+        );
+    }
 }
 
 let _db: Database;

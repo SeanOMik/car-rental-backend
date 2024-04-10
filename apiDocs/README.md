@@ -139,3 +139,35 @@ The location was not found.
 
 #### 401 UNAUTHORIZED
 No authentication was received, the session is invalid, or they were not logged into a vendor account.
+
+## Vehicle paths
+The base location path is `/api/v1/vehicle`
+
+### Get vehicles from id
+GET `/:vehicleId`\
+Response: 200 OK, with `Vehicle` JSON body.
+Requires authentication: `False`
+
+#### 404 NOT_FOUND
+The vehicle was not found.
+
+### Rent a vehicle
+POST `/:vehicleId/rent`\
+Request JSON body:
+
+```json
+{
+    // the amount of days the rent will be for
+    "lengthInDays": 10,
+}
+```
+
+Response: 200 OK
+Requires authentication: `True`
+
+**Possible responses:**
+|Status Code Number|Status Code|Description|
+|---|---|---|
+|404|`NOT_FOUND`|The vehicle was not found.|
+|409|`CONFLICT`|The vehicle is already rented.|
+|401|`UNAUTHORIZED`|No authentication was received or the session is invalid.|
