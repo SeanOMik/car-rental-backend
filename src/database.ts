@@ -180,19 +180,19 @@ export class Database {
      * Create a new location in the database, returning its unique id.
      *
      * @param location The location to add to the database.
-     * @returns The id of the new location.
+     * @returns The new location, now including its unique id.
      */
-    async newLocation(location: Location): Promise<number> {
+    async newLocation(location: Location): Promise<Location> {
         let res = await this.client.query(
-            "INSERT INTO location(uid, address) \
-                VALUES($1::int, $2::text) RETURNING uid",
+            "INSERT INTO location(address) \
+                VALUES($1::text) RETURNING uid",
             [
-                location.uid.toString(),
                 location.address
             ],
         );
 
-        return res.rows[0].uid;
+        location.uid = res.rows[0].id;
+        return location;
     }
 
     /**
@@ -209,7 +209,9 @@ export class Database {
 
         let row = res.rows[0];
         if (row) {
-            return new Location(locationId, row.address);
+            let loc = new Location(row.address);
+            loc.uid = locationId;
+            return loc;
         }
 
         return undefined;
@@ -257,7 +259,10 @@ export class Database {
 
         let locs = [];
         for (let row of res.rows) {
-            locs.push(new Location(parseInt(row.id), row.address))
+            let loc = new Location(row.address);
+            loc.uid = row.id;
+
+            locs.push(loc);
         }
 
         return locs;

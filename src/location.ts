@@ -1,9 +1,8 @@
 export class Location {
-    uid: number;
+    uid?: number;
     address: string;
 
-    constructor(uid: number, address: string) {
-        this.uid = uid;
+    constructor(address: string) {
         this.address = address;
     }
 }
