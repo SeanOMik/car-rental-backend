@@ -183,15 +183,11 @@ export class Database {
      * @returns The id of the new location.
      */
     async newLocation(location: Location): Promise<number> {
-        let locStr = location.uid
-            ? location.uid.toString()
-            : "NULL";
-
         let res = await this.client.query(
             "INSERT INTO location(uid, address) \
                 VALUES($1::int, $2::text) RETURNING uid",
             [
-                location.uid,
+                location.uid.toString(),
                 location.address
             ],
         );
