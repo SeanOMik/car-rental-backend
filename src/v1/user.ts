@@ -47,6 +47,7 @@ router.post(
     // body validation
     body("email").isEmail(),
     body("password").notEmpty(),
+    body("type").isNumeric(),
 
     async (req: Request, res: Response, next: NextFunction) => {
         // validate that the data is good and make the database query
@@ -54,16 +55,23 @@ router.post(
         if (result.isEmpty()) {
             const data = matchedData(req);
 
+            let user_type;
+            if (data.type == 1) {
+                user_type = UserType.Vendor;
+            } else {
+                user_type = UserType.Customer;
+            }
+
             let db = getDb();
-            let id = await db.registerUser(data.email, data.password, UserType.Customer);
+            let id = await db.registerUser(data.email, data.password, user_type);
 
             if (id) {
                 // update session
-                let user = new User(id, data.email, UserType.Customer);
+                let user = new User(id, data.email, user_type);
                 req.session.user = user;
                 req.session.save();
 
-                return res.send({ user_id: id.toString(), user_type: UserType.Customer });
+                return res.send({ user_id: id.toString(), user_type: user_type });
             } else {
                 // registerUser returns undefined if there is another user with the same email
                 return res.status(StatusCodes.CONFLICT).send({
