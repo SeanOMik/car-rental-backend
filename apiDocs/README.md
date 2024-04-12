@@ -100,8 +100,8 @@ A status code of `409` signifies that there is already a user with the same emai
 ## Location paths
 The base location path is `/api/v1/location`
 
-### Location register
-POST `/location/register`\
+### Create Location
+POST `/location/`\
 Request JSON body:
 
 ```json

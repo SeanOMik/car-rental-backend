@@ -112,7 +112,8 @@ router.get(
 );
 
 router.post(
-    "/register",
+    "/",
+    
     // body validation
     body("address").notEmpty(),
 
