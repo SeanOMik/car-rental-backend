@@ -27,7 +27,12 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+const corsOptions = {
+    origin: "http://localhost:3001",
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(bodyParser.json()); // setup express-validator
 setupExpressSession(app);
