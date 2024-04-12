@@ -128,7 +128,7 @@ router.post(
             } else if (req.session.user.uty == UserType.Customer) {
                 return res.status(StatusCodes.FORBIDDEN).send({
                     status: StatusCodes.FORBIDDEN,
-                    message: "This user is not authorized to be a Vendor",
+                    message: "You must be logged in as a Vendor to perform this action",
                 });
             }
 
