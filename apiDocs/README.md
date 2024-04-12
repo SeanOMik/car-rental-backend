@@ -110,6 +110,12 @@ Request JSON body:
 }
 ```
 
+#### 403 FORBIDDEN
+You must be logged in as a Vendor to perform this action.
+
+#### 409 CONFLICT
+Location with the same address already exists.
+
 ### Get vehicles at a location
 GET `/:locationId/vehicles`\
 Response: 200 OK, with `Vehicles[]` JSON body.
