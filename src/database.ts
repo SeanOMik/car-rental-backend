@@ -182,10 +182,14 @@ export class Database {
      * @param location The location to add to the database.
      * @returns The new location, now including its unique id.
      */
-    async newLocation(location: Location): Promise<Location> {
+    async newLocation(location: Location): Promise<Location | undefined> {
+        if (await this.doesLocationExist(location.address)) {
+            return undefined;
+        }
+
         let res = await this.client.query(
             "INSERT INTO location(address) \
-                VALUES($1::text) RETURNING uid",
+                VALUES($1::text) RETURNING id",
             [
                 location.address
             ],
@@ -193,6 +197,16 @@ export class Database {
 
         location.uid = res.rows[0].id;
         return location;
+    }
+
+    async doesLocationExist(address: string): Promise<boolean> {
+        let res = await this.client.query(
+            "SELECT EXISTS(SELECT 1 FROM location \
+            WHERE address = $1::text)",
+            [address],
+        );
+
+        return res.rows[0].exists;
     }
 
     /**

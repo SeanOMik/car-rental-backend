@@ -1,9 +1,10 @@
 import { Request, Response, Router } from "express";
 import { getDb } from "../database";
 import { StatusCodes } from "http-status-codes";
-import { body, param } from "express-validator";
+import { body, param, matchedData, validationResult } from "express-validator";
 import { Vehicle } from "../vehicle";
 import { UserType } from "../user";
+import { Location } from "../location";
 
 let router = Router();
 
@@ -105,6 +106,51 @@ router.get(
         } else {
             res.status(StatusCodes.UNAUTHORIZED).send();
         }
+    },
+);
+
+router.post(
+    "/register",
+    // body validation
+    body("address").notEmpty(),
+
+    async (req: Request, res: Response) => {
+        // validate that the data is good and make the database query
+        const result = validationResult(req);
+        if (result.isEmpty()) {
+            const data = matchedData(req);
+
+            if (typeof req.session.user == 'undefined') {
+                return res.status(StatusCodes.FORBIDDEN).send({
+                    status: StatusCodes.FORBIDDEN,
+                    message: "You must be logged in as a Vendor to perform this action"
+                })
+            } else if (req.session.user.uty == UserType.Customer) {
+                return res.status(StatusCodes.FORBIDDEN).send({
+                    status: StatusCodes.FORBIDDEN,
+                    message: "This user is not authorized to be a Vendor",
+                });
+            }
+
+            let db = getDb();
+            let id = await db.newLocation(new Location(data.address));
+
+            if (id) {
+                // update session
+                req.session.save();
+                return res.send({ id: id.uid, address: data.address });
+            } else {
+                // newlocation returns undefined if there is another location with the same address
+                return res.status(StatusCodes.CONFLICT).send({
+                    status: StatusCodes.CONFLICT,
+                    message: "Location with the same address already exists",
+                });
+            }
+        }
+
+        return res
+            .status(StatusCodes.BAD_REQUEST)
+            .send({ errors: result.array() });
     },
 );
 
