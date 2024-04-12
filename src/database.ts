@@ -246,12 +246,12 @@ export class Database {
         let res;
         if (includeRented) {
             res = await this.client.query(
-                "SELECT * FROM vehicles WHERE locationId = $1::integer",
+                "SELECT * FROM vehicle WHERE locationId = $1::integer",
                 [locationId],
             );
         } else {
             res = await this.client.query(
-                "SELECT * FROM vehicles WHERE locationId = $1::integer AND is_rented = false",
+                "SELECT * FROM vehicle WHERE locationId = $1::integer AND is_rented = false",
                 [locationId],
             );
         }
