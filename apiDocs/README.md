@@ -85,6 +85,7 @@ Request JSON body:
 {
     "email": "john_doe@example.com",
     "password": "password1234",
+    "type": 0
 }
 ```
 
