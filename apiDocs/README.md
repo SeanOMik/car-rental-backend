@@ -100,6 +100,16 @@ A status code of `409` signifies that there is already a user with the same emai
 ## Location paths
 The base location path is `/api/v1/location`
 
+### Location register
+POST `/location/register`\
+Request JSON body:
+
+```json
+{
+    "address": "123 Sesame Street, Orlando, FL 12345"
+}
+```
+
 ### Get vehicles at a location
 GET `/:locationId/vehicles`\
 Response: 200 OK, with `Vehicles[]` JSON body.
