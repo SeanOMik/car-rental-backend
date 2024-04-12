@@ -111,7 +111,7 @@ export class Database {
             row.make,
             row.model,
             row.year,
-            row.axles,
+            row.seats,
             row.doors,
             row.body_type,
             row.rent_cost_per_day,
@@ -156,7 +156,7 @@ export class Database {
 
         let res = await this.client.query(
             "INSERT INTO vehicle(make, location_id, model, year, doors, body_type, \
-                axles, rent_cost_per_day, color, is_rented) \
+                seats, rent_cost_per_day, color, is_rented) \
                 VALUES($1::text, $2, $3::text, $4::int, $5::int, $6::text, $7::int, \
                     $8::float, $9::text, $10) RETURNING id",
             [
@@ -166,7 +166,7 @@ export class Database {
                 vehicle.year.toString(),
                 vehicle.doors.toString(),
                 vehicle.bodyType,
-                vehicle.axles.toString(),
+                vehicle.seats.toString(),
                 vehicle.rentCostPerDay.toString(),
                 vehicle.color,
                 vehicle.isRented.toString(),
@@ -190,9 +190,7 @@ export class Database {
         let res = await this.client.query(
             "INSERT INTO location(address) \
                 VALUES($1::text) RETURNING id",
-            [
-                location.address
-            ],
+            [location.address],
         );
 
         location.uid = res.rows[0].id;
@@ -211,7 +209,7 @@ export class Database {
 
     /**
      * Get a location from an id
-     * 
+     *
      * @param locationId The id of the location
      * @returns The location, or undefined if it wasn't found
      */
@@ -233,11 +231,14 @@ export class Database {
 
     /**
      * Get the vehicles at a location.
-     * 
+     *
      * @param locationId The id of the location to get vehicles from.
      * @returns An array of vehicles that are currently at the location, or undefined if the location was not found
      */
-    async getLocationVehicles(locationId: number, includeRented: boolean): Promise<Vehicle[] | undefined> {
+    async getLocationVehicles(
+        locationId: number,
+        includeRented: boolean,
+    ): Promise<Vehicle[] | undefined> {
         if (this.getLocation(locationId) == undefined) {
             return undefined;
         }
@@ -265,7 +266,7 @@ export class Database {
 
     /**
      * Get all locations.
-     * 
+     *
      * @returns An array of locations.
      */
     async getLocations(): Promise<Location[]> {
@@ -284,27 +285,32 @@ export class Database {
 
     /**
      * Rent a vehicle for a specified amount of days.
-     * 
+     *
      * @param vehicleId The id of the vehicle to rent.
      * @param renterUserId The id of the user that is renting the vehicle.
      * @param lengthDays The length in days that the rent will be for.
      * @param startDate The start of the rent, defaults to now.
      */
-    async rentVehicle(vehicleId: number, renterUserId: number, lengthDays: number, startDate: Date = new Date(Date.now())) {
-        await this.client.query("INSERT INTO rent_requests(vehicle_id, renter_user_id, start_date, length_days) \
+    async rentVehicle(
+        vehicleId: number,
+        renterUserId: number,
+        lengthDays: number,
+        startDate: Date = new Date(Date.now()),
+    ) {
+        await this.client.query(
+            "INSERT INTO rent_requests(vehicle_id, renter_user_id, start_date, length_days) \
             VALUES($1::int, $2::string, $2::int)",
             [
                 vehicleId.toString(),
                 renterUserId.toString(),
                 startDate.toISOString(),
-                lengthDays.toString()
-            ]
+                lengthDays.toString(),
+            ],
         );
 
-        await this.client.query("UPDATE vehicle SET is_rented = true WHERE id = $1::int",
-            [
-                vehicleId.toString(),
-            ]
+        await this.client.query(
+            "UPDATE vehicle SET is_rented = true WHERE id = $1::int",
+            [vehicleId.toString()],
         );
     }
 }

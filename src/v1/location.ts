@@ -10,14 +10,17 @@ let router = Router();
 
 router.get(
     "/:locationId/vehicles",
-    
+
     param("locationId").isInt(),
 
     async (req: Request, res: Response) => {
         if (req.session.user) {
             let db = getDb();
 
-            let vehicles = await db.getLocationVehicles(parseInt(req.params.locationId, 10), false);
+            let vehicles = await db.getLocationVehicles(
+                parseInt(req.params.locationId, 10),
+                false,
+            );
             if (vehicles) {
                 res.send(vehicles);
             } else {
@@ -31,22 +34,24 @@ router.get(
 
 router.post(
     "/:locationId/vehicles",
-    
+
     param("locationId").isInt(),
-    
+
     body("make").notEmpty(),
     body("model").notEmpty(),
     body("year").isInt(),
-    body("axles").isInt(),
+    body("seats").isInt(),
     body("doors").isInt(),
     body("bodyType").notEmpty(),
     body("rentCostPerDay").isInt(),
     body("color").notEmpty(),
-    body("isRented").if((value, { req }) => 
-        // if the value is specified, ensure that its a boolean, if its not
-        // specified allow the request.
-        (req.body.isRented && body("isRented").isBoolean())
-            || req.body.isRented == undefined ),
+    body("isRented").if(
+        (value, { req }) =>
+            // if the value is specified, ensure that its a boolean, if its not
+            // specified allow the request.
+            (req.body.isRented && body("isRented").isBoolean()) ||
+            req.body.isRented == undefined,
+    ),
 
     async (req: Request, res: Response) => {
         if (req.session.user && req.session.user.uty == UserType.Vendor) {
@@ -74,19 +79,16 @@ router.post(
     },
 );
 
-router.get(
-    "/",
-    async (req: Request, res: Response) => {
-        if (req.session.user) {
-            let db = getDb();
+router.get("/", async (req: Request, res: Response) => {
+    if (req.session.user) {
+        let db = getDb();
 
-            let locs = await db.getLocations();
-            res.send(locs);
-        } else {
-            res.status(StatusCodes.UNAUTHORIZED).send();
-        }
-    },
-);
+        let locs = await db.getLocations();
+        res.send(locs);
+    } else {
+        res.status(StatusCodes.UNAUTHORIZED).send();
+    }
+});
 
 router.get(
     "/:locationId",
@@ -120,15 +122,17 @@ router.post(
         if (result.isEmpty()) {
             const data = matchedData(req);
 
-            if (typeof req.session.user == 'undefined') {
+            if (typeof req.session.user == "undefined") {
                 return res.status(StatusCodes.FORBIDDEN).send({
                     status: StatusCodes.FORBIDDEN,
-                    message: "You must be logged in as a Vendor to perform this action"
-                })
+                    message:
+                        "You must be logged in as a Vendor to perform this action",
+                });
             } else if (req.session.user.uty == UserType.Customer) {
                 return res.status(StatusCodes.FORBIDDEN).send({
                     status: StatusCodes.FORBIDDEN,
-                    message: "You must be logged in as a Vendor to perform this action",
+                    message:
+                        "You must be logged in as a Vendor to perform this action",
                 });
             }
 

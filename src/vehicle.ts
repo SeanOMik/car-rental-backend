@@ -5,7 +5,7 @@ export class Vehicle {
     make: string;
     model: string;
     year: number;
-    axles: number;
+    seats: number;
     doors: number;
     bodyType: string;
     rentCostPerDay: number;
@@ -17,7 +17,7 @@ export class Vehicle {
         make: string,
         model: string,
         year: number,
-        axles: number,
+        seats: number,
         doors: number,
         bodyType: string,
         rentCostPerDay: number,
@@ -28,7 +28,7 @@ export class Vehicle {
         this.make = make;
         this.model = model;
         this.year = year;
-        this.axles = axles;
+        this.seats = seats;
         this.doors = doors;
         this.bodyType = bodyType;
         this.rentCostPerDay = rentCostPerDay;

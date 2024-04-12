@@ -19,7 +19,7 @@ exports.up = pgm => {
         model: { type: "varchar(30)", notNull: true },
         year: { type: "smallint", notNull: true },
         doors: { type: "smallint", notNull: true },
-        axles: { type: "smallint", notNull: true },
+        seats: { type: "smallint", notNull: true },
         body_type: { type: "varchar(30)", notNull: true },
         rent_cost_per_day: { type: "numeric(8,2)", notNull: true },
         color: { type: "varchar(20)", notNull: true },
