@@ -27,7 +27,7 @@ router.post(
 
     param("vehId").isInt(),
 
-    body("lengthInDays").isEmail(),
+    body("lengthInDays").isInt(),
 
     async (req: Request, res: Response) => {
         if (req.session.user) {
@@ -50,6 +50,6 @@ router.post(
             res.status(StatusCodes.UNAUTHORIZED).send();
         }
     },
-)
+);
 
 module.exports = router;
