@@ -98,7 +98,7 @@ router.get(
     async (req: Request, res: Response) => {
         if (req.session.user) {
             let db = getDb();
-
+ 
             let loc = await db.getLocation(parseInt(req.params.locationId, 10));
             if (loc) {
                 res.send(loc);
@@ -156,6 +156,32 @@ router.post(
         return res
             .status(StatusCodes.BAD_REQUEST)
             .send({ errors: result.array() });
+    },
+);
+
+router.delete(
+    "/:locationId",
+
+    param("locationId").notEmpty(),
+
+    async (req: Request, res: Response) => {
+        if (req.session.user) {
+            let db = getDb();
+            let locDelete = await db.deleteLocation(parseInt(req.params.locationId, 10));
+            if (locDelete) {
+                return res.status(StatusCodes.ACCEPTED).send({
+                    status: StatusCodes.ACCEPTED,
+                    message: "Location deleted"
+                });
+            } else {
+                return res.status(StatusCodes.NOT_FOUND).send({
+                    status: StatusCodes.NOT_FOUND,
+                    message: "Location does not exist"
+                });
+            }
+        } else {
+            return res.status(StatusCodes.UNAUTHORIZED).send();
+        }
     },
 );
 

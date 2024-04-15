@@ -229,6 +229,20 @@ export class Database {
         return undefined;
     }
 
+    async deleteLocation(locationId: number): Promise<boolean | undefined> {
+        let res = await this.client.query(
+            "DELETE FROM location WHERE id = $1::integer",
+            [locationId],
+        );
+
+        let row = res.rows[0];
+        if (typeof row !== 'undefined') {
+            return true;
+        }
+
+        return undefined;
+    }
+
     /**
      * Get the vehicles at a location.
      *
