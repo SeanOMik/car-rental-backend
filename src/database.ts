@@ -327,6 +327,50 @@ export class Database {
             [vehicleId.toString()],
         );
     }
+
+    async vehicleIsRented(id: number): Promise<boolean | undefined> {
+        let rented = await this.client.query(
+            "SELECT FROM vehicle WHERE id = $1::int",
+            [id],
+        );
+
+        if (rented == undefined)
+            return false;
+        else
+            return rented.rows[0].is_rented;
+    }
+
+    async returnVehicle(
+        vehicleId: number,
+        renterUserId: number,
+        endDate: Date = new Date(Date.now()),
+    ) {
+        let veh = await this.getVehicle(vehicleId);
+
+        if (veh == undefined)
+            return;
+
+        let rent_check = await this.client.query(
+            "SELECT FROM rent_requests WHERE vehicle_id = $1::int AND renter_user_id = $2::int",
+            [
+                vehicleId,
+                renterUserId,
+            ],
+        );
+
+        if (rent_check == undefined)
+            return;
+
+        let days_passed = (endDate.getTime() - rent_check.rows[0].start_date.getTime()) / (1000 * 60 * 60 *24);
+
+        if (days_passed > rent_check.rows[0].length_days)
+            // mark vehicle late
+
+        await this.client.query(
+            "UPDATE vehicle SET is_rented = false WHERE id = $1::int",
+            [vehicleId.toString()],
+        );
+    }
 }
 
 let _db: Database;
