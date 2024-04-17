@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { getDb } from "../database";
 import { StatusCodes } from "http-status-codes";
-import { body, param, matchedData, validationResult } from "express-validator";
+import { query, body, param, matchedData, validationResult } from "express-validator";
 import { Vehicle } from "../vehicle";
 import { UserType } from "../user";
 import { Location } from "../location";
@@ -12,19 +12,32 @@ router.get(
     "/:locationId/vehicles",
 
     param("locationId").isInt(),
+    query("includeRented").optional().isBoolean(),
 
     async (req: Request, res: Response) => {
         if (req.session.user) {
-            let db = getDb();
+            const result = validationResult(req);
+            if (result.isEmpty()) {
+                return res.status(StatusCodes.BAD_REQUEST).send({
+                    status: StatusCodes.BAD_REQUEST,
+                    message: "Only vendor accounts can create new locations"
+                });
+            }
 
+            // if includeRented is provided, convert it to a boolean, if its missing, default to false.
+            const includeRented = req.query.includeRented ?
+                req.query.includeRented.toString().toLowerCase() == 'true' : false;
+
+            let db = getDb();
             let vehicles = await db.getLocationVehicles(
-                parseInt(req.params.locationId, 10),
-                false,
+                parseInt(req.params.locationId),
+                includeRented,
             );
+            
             if (vehicles) {
                 res.send(vehicles);
             } else {
-                res.status(StatusCodes.NOT_FOUND);
+                res.status(StatusCodes.NOT_FOUND).send();
             }
         } else {
             res.status(StatusCodes.UNAUTHORIZED).send();
@@ -43,15 +56,9 @@ router.post(
     body("seats").isInt(),
     body("doors").isInt(),
     body("bodyType").notEmpty(),
-    body("rentCostPerDay").isInt(),
+    body("rentCostPerDay").isNumeric(),
     body("color").notEmpty(),
-    body("isRented").if(
-        (value, { req }) =>
-            // if the value is specified, ensure that its a boolean, if its not
-            // specified allow the request.
-            (req.body.isRented && body("isRented").isBoolean()) ||
-            req.body.isRented == undefined,
-    ),
+    body("isRented").optional().isBoolean(),
 
     async (req: Request, res: Response) => {
         if (req.session.user && req.session.user.uty == UserType.Vendor) {
@@ -60,7 +67,10 @@ router.post(
             // make sure the location exists before we try to add a vehicle that references it.
             let loc = db.getLocation(parseInt(req.params.locationId));
             if (loc == undefined) {
-                res.status(StatusCodes.NOT_FOUND);
+                return res.status(StatusCodes.NOT_FOUND).send({
+                    status: StatusCodes.NOT_FOUND,
+                    message: "Could not find location"
+                });
             }
 
             var v: Vehicle = req.body;
@@ -71,7 +81,7 @@ router.post(
                 v.uid = id;
                 res.send(v);
             } else {
-                res.status(StatusCodes.NOT_FOUND);
+                res.status(StatusCodes.NOT_FOUND).send();
             }
         } else {
             res.status(StatusCodes.UNAUTHORIZED).send();
@@ -103,7 +113,7 @@ router.get(
             if (loc) {
                 res.send(loc);
             } else {
-                res.status(StatusCodes.NOT_FOUND);
+                res.status(StatusCodes.NOT_FOUND).send();
             }
         } else {
             res.status(StatusCodes.UNAUTHORIZED).send();
@@ -118,44 +128,28 @@ router.post(
     body("address").notEmpty(),
 
     async (req: Request, res: Response) => {
-        // validate that the data is good and make the database query
-        const result = validationResult(req);
-        if (result.isEmpty()) {
-            const data = matchedData(req);
-
-            if (typeof req.session.user == "undefined") {
+        if (req.session.user) {
+            if (req.session.user.uty != UserType.Vendor) {
                 return res.status(StatusCodes.FORBIDDEN).send({
                     status: StatusCodes.FORBIDDEN,
-                    message:
-                        "You must be logged in as a Vendor to perform this action",
-                });
-            } else if (req.session.user.uty == UserType.Customer) {
-                return res.status(StatusCodes.FORBIDDEN).send({
-                    status: StatusCodes.FORBIDDEN,
-                    message:
-                        "You must be logged in as a Vendor to perform this action",
+                    message: "Only vendor accounts can create new locations"
                 });
             }
-
             let db = getDb();
-            let id = await db.newLocation(new Location(data.address));
 
-            if (id) {
-                // update session
-                req.session.save();
-                return res.send({ id: id.uid, address: data.address });
+            const locRequest = new Location(req.body.address)
+            const loc = await db.newLocation(locRequest);
+            if (loc) {
+                res.send(loc);
             } else {
-                // newlocation returns undefined if there is another location with the same address
-                return res.status(StatusCodes.CONFLICT).send({
+                res.status(StatusCodes.CONFLICT).send({
                     status: StatusCodes.CONFLICT,
-                    message: "Location with the same address already exists",
+                    message: "There is already a location with the same address"
                 });
             }
+        } else {
+            res.status(StatusCodes.UNAUTHORIZED).send();
         }
-
-        return res
-            .status(StatusCodes.BAD_REQUEST)
-            .send({ errors: result.array() });
     },
 );
 
@@ -167,7 +161,7 @@ router.delete(
     async (req: Request, res: Response) => {
         if (req.session.user) {
             let db = getDb();
-            let locDelete = await db.deleteLocation(parseInt(req.params.locationId, 10));
+            let locDelete = await db.deleteLocation(parseInt(req.params.locationId));
             if (locDelete) {
                 return res.status(StatusCodes.ACCEPTED).send({
                     status: StatusCodes.ACCEPTED,

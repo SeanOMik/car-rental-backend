@@ -157,8 +157,8 @@ export class Database {
         let res = await this.client.query(
             "INSERT INTO vehicle(make, location_id, model, year, doors, body_type, \
                 seats, rent_cost_per_day, color, is_rented) \
-                VALUES($1::text, $2, $3::text, $4::int, $5::int, $6::text, $7::int, \
-                    $8::float, $9::text, $10) RETURNING id",
+                VALUES($1, $2, $3, $4, $5, $6, $7, \
+                    $8, $9, $10) RETURNING id",
             [
                 vehicle.make,
                 vehLocStr,
@@ -370,6 +370,14 @@ export class Database {
             "UPDATE vehicle SET is_rented = false WHERE id = $1::int",
             [vehicleId.toString()],
         );
+    }
+
+    async getUser(userId: number): Promise<User | undefined> {
+        const res = await this.client.query("SELECT * from users where id = $1::int", [userId]);
+        const row = res.rows[0];
+
+        const ty = row.user_type == 1 ? UserType.Vendor : UserType.Customer;
+        return new User(row.id, row.email, ty);
     }
 }
 

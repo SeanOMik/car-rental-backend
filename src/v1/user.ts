@@ -28,6 +28,7 @@ router.post(
                     message: "Incorrect username or password",
                 });
             }
+            console.log(`User logged in: ${JSON.stringify(user)}`);
 
             // update session
             req.session.user = user;
@@ -47,7 +48,7 @@ router.post(
     // body validation
     body("email").isEmail(),
     body("password").notEmpty(),
-    body("type").isNumeric(),
+    body("type").optional().isNumeric(),
 
     async (req: Request, res: Response, next: NextFunction) => {
         // validate that the data is good and make the database query

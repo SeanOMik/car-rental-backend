@@ -121,6 +121,13 @@ GET `/:locationId/vehicles`\
 Response: 200 OK, with `Vehicles[]` JSON body.
 Requires authentication: `True`
 
+Query parameters:
+|Name|Type|Description|
+|---|---|---|
+|`includeRented`?|`boolean`|Set to true to get vehicles that are currently rented, defaults to false|
+
+> ?: optional parameter, defaults to false
+
 #### 404 NOT_FOUND
 The location was not found.
 

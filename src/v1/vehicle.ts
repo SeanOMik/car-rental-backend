@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { getDb } from "../database";
 import { StatusCodes } from "http-status-codes";
-import { body, param } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 
 let router = Router();
 
@@ -11,6 +11,11 @@ router.get(
     param("vehId").isInt(),
 
     async (req: Request, res: Response) => {
+        const result = validationResult(req);
+        if (result.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST);
+        }
+
         let db = getDb();
 
         let vehicle = await db.getVehicle(parseInt(req.params.vehId));
@@ -30,6 +35,11 @@ router.post(
     body("lengthInDays").isInt(),
 
     async (req: Request, res: Response) => {
+        const result = validationResult(req);
+        if (result.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST);
+        }
+
         if (req.session.user) {
             let db = getDb();
             const vehId = parseInt(req.params.vehId);
