@@ -154,6 +154,10 @@ export class Database {
             ? vehicle.locationId.toString()
             : "NULL";
 
+        let vehIsRented = vehicle.isRented
+            ? vehicle.isRented
+            : false;
+
         let res = await this.client.query(
             "INSERT INTO vehicle(make, location_id, model, year, doors, body_type, \
                 seats, rent_cost_per_day, color, is_rented) \
@@ -169,7 +173,7 @@ export class Database {
                 vehicle.seats.toString(),
                 vehicle.rentCostPerDay.toString(),
                 vehicle.color,
-                vehicle.isRented.toString(),
+                vehIsRented.toString(),
             ],
         );
 
