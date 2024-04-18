@@ -1,7 +1,8 @@
 import { Request, Response, Router } from "express";
 import { getDb } from "../database";
 import { StatusCodes } from "http-status-codes";
-import { body, param, validationResult } from "express-validator";
+import { body, matchedData, param, validationResult } from "express-validator";
+import { UserType } from "../user";
 
 let router = Router();
 
@@ -55,6 +56,56 @@ router.post(
             }
 
             await db.rentVehicle(vehId, req.session.user.uid, lengthInDays);
+            res.status(StatusCodes.OK).send();
+        } else {
+            res.status(StatusCodes.UNAUTHORIZED).send();
+        }
+    },
+);
+
+router.post(
+    "/:vehId/relocate",
+
+    param("vehId").isInt(),
+
+    body("location").isInt(),
+
+    async (req: Request, res: Response) => {
+        if (req.session.user) {
+            const data = matchedData(req);
+
+            // only allow vendor user accounts
+            if (req.session.user.uty != UserType.Vendor) {
+                return res.status(StatusCodes.FORBIDDEN).send({
+                    status: StatusCodes.FORBIDDEN,
+                    message: "Only vendor accounts can create new locations"
+                });
+            }
+
+            let db = getDb();
+            const veh = await db.getVehicle(data.vehId);
+            if (veh == undefined) {
+                return res.status(StatusCodes.NOT_FOUND).send({
+                    status: StatusCodes.NOT_FOUND,
+                    message: "Vehicle was not found",
+                })
+            }
+
+            if (veh.locationId == data.location) {
+                return res.status(StatusCodes.NOT_MODIFIED).send({
+                    status: StatusCodes.NOT_MODIFIED,
+                    message: "Vehicle is already at location",
+                })
+            }
+
+            if (!await db.relocateVehicle(data.vehId, data.location)) {
+                return res.status(StatusCodes.NOT_FOUND).send({
+                    status: StatusCodes.NOT_FOUND,
+                    // due to a previous check, we know the vehicle id was correct by this point
+                    message: "Location was not found",
+                })
+            }
+
             res.status(StatusCodes.OK).send();
         } else {
             res.status(StatusCodes.UNAUTHORIZED).send();

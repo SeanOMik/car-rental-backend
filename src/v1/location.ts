@@ -16,13 +16,10 @@ router.get(
 
     async (req: Request, res: Response) => {
         if (req.session.user) {
-            const result = validationResult(req);
+            /* const result = validationResult(req);
             if (result.isEmpty()) {
-                return res.status(StatusCodes.BAD_REQUEST).send({
-                    status: StatusCodes.BAD_REQUEST,
-                    message: "Only vendor accounts can create new locations"
-                });
-            }
+                return res.status(StatusCodes.BAD_REQUEST).send();
+            } */
 
             // if includeRented is provided, convert it to a boolean, if its missing, default to false.
             const includeRented = req.query.includeRented ?

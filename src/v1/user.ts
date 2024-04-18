@@ -28,7 +28,6 @@ router.post(
                     message: "Incorrect username or password",
                 });
             }
-            console.log(`User logged in: ${JSON.stringify(user)}`);
 
             // update session
             req.session.user = user;

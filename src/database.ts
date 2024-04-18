@@ -372,6 +372,26 @@ export class Database {
         );
     }
 
+    async relocateVehicle(
+        vehicleId: number,
+        newLocation: number,
+    ): Promise<boolean> {
+        // ensure that the new location and the vehicle exists
+        if (await this.getLocation(newLocation) == undefined || await this.getVehicle(vehicleId) == undefined) {
+            return false;
+        }
+
+        await this.client.query(
+            "UPDATE vehicle SET location_id = $1::int WHERE id = $2::int",
+            [
+                newLocation,
+                vehicleId,
+            ],
+        );
+
+        return true;
+    }
+
     async getUser(userId: number): Promise<User | undefined> {
         const res = await this.client.query("SELECT * from users where id = $1::int", [userId]);
         const row = res.rows[0];

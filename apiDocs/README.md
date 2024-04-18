@@ -195,3 +195,26 @@ Requires authentication: `True`
 |404|`NOT_FOUND`|The vehicle was not found.|
 |409|`CONFLICT`|The vehicle is already rented.|
 |401|`UNAUTHORIZED`|No authentication was received or the session is invalid.|
+
+### Relocate a vehicle
+POST `/:vehicleId/relocate`\
+Request JSON body:
+
+```json
+{
+    // id of the new location of the vehicle
+    "location": 1,
+}
+```
+
+Response: 200 OK
+Requires authentication: `True`, Vendor account
+
+**Possible responses:**
+|Status Code Number|Status Code|Description|
+|---|---|---|
+|200|`OK`|The vehicle was relocated to the new location.|
+|404|`NOT_FOUND`|The vehicle or new location was not found.|
+|409|`NOT_MODIFIED`|The vehicle is already at the location.|
+|401|`UNAUTHORIZED`|No authentication was received or the session is invalid.|
+|401|`FORBIDDEN`|This endpoint requires a vendor account, which the session does not correspond to.|
