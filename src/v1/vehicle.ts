@@ -14,7 +14,7 @@ router.get(
     async (req: Request, res: Response) => {
         const result = validationResult(req);
         if (result.isEmpty()) {
-            return res.status(StatusCodes.BAD_REQUEST);
+            return res.status(StatusCodes.BAD_REQUEST).send();
         }
 
         let db = getDb();
