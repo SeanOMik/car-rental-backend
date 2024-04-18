@@ -317,7 +317,7 @@ export class Database {
     ) {
         await this.client.query(
             "INSERT INTO rent_requests(vehicle_id, renter_user_id, start_date, length_days) \
-            VALUES($1::int, $2::string, $2::int)",
+            VALUES($1::int, $2::string, $3, $4::int)",
             [
                 vehicleId.toString(),
                 renterUserId.toString(),
@@ -346,34 +346,27 @@ export class Database {
 
     async returnVehicle(
         vehicleId: number,
-        renterUserId: number,
         endDate: Date = new Date(Date.now()),
-    ) {
+    ): Promise<boolean> {
+        // ensure that the vehicle exists
         let veh = await this.getVehicle(vehicleId);
-
         if (veh == undefined)
-            return;
+            return false;
 
-        let rent_check = await this.client.query(
-            "SELECT FROM rent_requests WHERE vehicle_id = $1::int AND renter_user_id = $2::int",
+        await this.client.query(
+            "UPDATE rent_requests SET end_date = $1 WHERE id = $2::int",
             [
-                vehicleId,
-                renterUserId,
+                endDate.toISOString(),
+                vehicleId.toString(),
             ],
         );
-
-        if (rent_check == undefined)
-            return;
-
-        let days_passed = (endDate.getTime() - rent_check.rows[0].start_date.getTime()) / (1000 * 60 * 60 *24);
-
-        if (days_passed > rent_check.rows[0].length_days)
-            // mark vehicle late
 
         await this.client.query(
             "UPDATE vehicle SET is_rented = false WHERE id = $1::int",
             [vehicleId.toString()],
         );
+
+        return true;
     }
 
     async relocateVehicle(

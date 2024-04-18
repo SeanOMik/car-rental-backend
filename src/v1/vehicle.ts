@@ -63,6 +63,38 @@ router.post(
     },
 );
 
+router.delete(
+    "/:vehId/rent",
+
+    param("vehId").isInt(),
+
+    async (req: Request, res: Response) => {
+        const result = validationResult(req);
+        if (!result.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST);
+        }
+
+        if (req.session.user) {
+            let db = getDb();
+            const vehId = parseInt(req.params.vehId);
+
+            const veh = await db.getVehicle(vehId);
+            if (veh == undefined) {
+                // ensure that the provided vehicle id is a valid vehicle
+                return res.status(StatusCodes.NOT_FOUND).send();
+            } else if (!veh.isRented) {
+                // ensures that this vehicle is not already rented
+                return res.status(StatusCodes.NOT_MODIFIED).send();
+            }
+
+            await db.returnVehicle(vehId);
+            res.status(StatusCodes.OK).send();
+        } else {
+            res.status(StatusCodes.UNAUTHORIZED).send();
+        }
+    },
+);
+
 router.post(
     "/:vehId/relocate",
 

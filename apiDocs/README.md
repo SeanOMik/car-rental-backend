@@ -196,6 +196,18 @@ Requires authentication: `True`
 |409|`CONFLICT`|The vehicle is already rented.|
 |401|`UNAUTHORIZED`|No authentication was received or the session is invalid.|
 
+### Return a vehicle
+DELETE `/:vehicleId/rent`\
+
+Response: 200 OK
+Requires authentication: `True`
+
+**Possible responses:**
+|Status Code Number|Status Code|Description|
+|---|---|---|
+|404|`NOT_FOUND`|The vehicle was not found.|
+|401|`NOT_MODIFIED`|The vehicle is not rented, so nothing changed.|
+
 ### Relocate a vehicle
 POST `/:vehicleId/relocate`\
 Request JSON body:
