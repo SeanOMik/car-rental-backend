@@ -13,7 +13,7 @@ router.get(
 
     async (req: Request, res: Response) => {
         const result = validationResult(req);
-        if (result.isEmpty()) {
+        if (!result.isEmpty()) {
             return res.status(StatusCodes.BAD_REQUEST).send();
         }
 
@@ -37,7 +37,7 @@ router.post(
 
     async (req: Request, res: Response) => {
         const result = validationResult(req);
-        if (result.isEmpty()) {
+        if (!result.isEmpty()) {
             return res.status(StatusCodes.BAD_REQUEST);
         }
 
