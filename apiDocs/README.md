@@ -186,6 +186,9 @@ Request JSON body:
 }
 ```
 
+If you are logged in as a vendor account, you can also specify another user to rent this vehicle for.
+To do so, you specify the other user's email in the body of the request with the field `forUserEmail`.
+
 Response: 200 OK
 Requires authentication: `True`
 

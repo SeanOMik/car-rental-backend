@@ -85,26 +85,6 @@ export class Database {
         return undefined;
     }
 
-    /**
-     * Retrieve the user email from their id.
-     *
-     * @param id The id of the user
-     * @returns The email of the user
-     */
-    async getUserEmail(id: number): Promise<string | undefined> {
-        let res = await this.client.query(
-            "SELECT email FROM users WHERE id = $1::integer",
-            [id],
-        );
-
-        let row = res.rows[0];
-        if (row) {
-            return row.email;
-        }
-
-        return undefined;
-    }
-
     private vehicleFromRow(row: any): Vehicle {
         let v = new Vehicle(
             row.id,
@@ -393,8 +373,28 @@ export class Database {
         const res = await this.client.query("SELECT * from users where id = $1::int", [userId]);
         const row = res.rows[0];
 
-        const ty = row.user_type == 1 ? UserType.Vendor : UserType.Customer;
-        return new User(row.id, row.email, ty);
+        if (row) {
+            const ty = row.user_type == 1 ? UserType.Vendor : UserType.Customer;
+            return new User(row.id, row.email, ty);
+        }
+
+        return undefined;
+    }
+
+    async getUserFromEmail(email: string): Promise<User | undefined> {
+        const res = await this.client.query(
+            "SELECT id, user_type FROM users \
+            WHERE email = $1::text",
+            [email],
+        );
+        const row = res.rows[0];
+
+        if (row) {
+            const ty = row.user_type == 1 ? UserType.Vendor : UserType.Customer;
+            return new User(row.id, email, ty);
+        }
+
+        return undefined;
     }
 }
 

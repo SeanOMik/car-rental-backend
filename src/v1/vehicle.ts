@@ -34,11 +34,12 @@ router.post(
     param("vehId").isInt(),
 
     body("lengthInDays").isInt(),
+    body("forUserEmail").optional(),
 
     async (req: Request, res: Response) => {
         const result = validationResult(req);
         if (!result.isEmpty()) {
-            return res.status(StatusCodes.BAD_REQUEST);
+            return res.status(StatusCodes.BAD_REQUEST).send();
         }
 
         if (req.session.user) {
@@ -55,7 +56,30 @@ router.post(
                 return res.status(StatusCodes.CONFLICT).send();
             }
 
-            await db.rentVehicle(vehId, req.session.user.uid, lengthInDays);
+            // check if the request for renting is for another user and ensure
+            // that the request is from a vendor account
+            if (req.body.forUserEmail) {
+                if (req.session.user.uty != UserType.Vendor) {
+                    return res.status(StatusCodes.FORBIDDEN).send({
+                        status: StatusCodes.FORBIDDEN,
+                        message: "You must be a vendor to rent vehicles for other users",
+                    });
+                }
+
+                // get other user
+                let otherUser = await db.getUserFromEmail(req.body.forUserEmail);
+                if (otherUser == undefined) {
+                    return res.status(StatusCodes.NOT_FOUND).send({
+                        status: StatusCodes.NOT_FOUND,
+                        message: "Other user to rent for is not found",
+                    });
+                }
+
+                await db.rentVehicle(vehId, otherUser.uid, lengthInDays);
+            } else {
+                await db.rentVehicle(vehId, req.session.user.uid, lengthInDays);
+            }
+
             res.status(StatusCodes.OK).send();
         } else {
             res.status(StatusCodes.UNAUTHORIZED).send();
