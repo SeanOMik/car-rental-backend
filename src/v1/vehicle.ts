@@ -34,7 +34,7 @@ router.post(
     param("vehId").isInt(),
 
     body("lengthInDays").isInt(),
-    body("forUserEmail").optional(),
+    body("forUserEmail").optional().isEmail(),
 
     async (req: Request, res: Response) => {
         const result = validationResult(req);

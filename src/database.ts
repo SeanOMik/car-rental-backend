@@ -130,10 +130,12 @@ export class Database {
      * @returns The id of the new vehicle.
      */
     async newVehicle(vehicle: Vehicle): Promise<number> {
+        // optional field
         let vehLocStr = vehicle.locationId
             ? vehicle.locationId.toString()
             : "NULL";
 
+        // isRented is an optional field, so must check if its there
         let vehIsRented = vehicle.isRented
             ? vehicle.isRented
             : false;

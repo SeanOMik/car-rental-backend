@@ -58,6 +58,11 @@ router.post(
     body("isRented").optional().isBoolean(),
 
     async (req: Request, res: Response) => {
+        const result = validationResult(req);
+        if (!result.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST).send();
+        }
+
         if (req.session.user && req.session.user.uty == UserType.Vendor) {
             let db = getDb();
 
@@ -103,6 +108,11 @@ router.get(
     param("locationId").isInt(),
 
     async (req: Request, res: Response) => {
+        const result = validationResult(req);
+        if (!result.isEmpty()) {
+            return res.status(StatusCodes.BAD_REQUEST).send();
+        }
+
         if (req.session.user) {
             let db = getDb();
  

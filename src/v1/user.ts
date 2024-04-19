@@ -87,20 +87,4 @@ router.post(
     },
 );
 
-router.get(
-    "/isAuthed",
-
-    async (req: Request, res: Response) => {
-        if (req.session.user) {
-            let db = getDb();
-
-            let email = await db.getUserEmail(req.session.user.uid);
-            res.send(`You are authenticated as ${email}`);
-
-        } else {
-            res.status(StatusCodes.UNAUTHORIZED).send();
-        }
-    },
-);
-
 module.exports = router;
