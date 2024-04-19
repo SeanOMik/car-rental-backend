@@ -317,7 +317,7 @@ export class Database {
     ) {
         await this.client.query(
             "INSERT INTO rent_requests(vehicle_id, renter_user_id, start_date, length_days) \
-            VALUES($1::int, $2::string, $2::int)",
+            VALUES($1::integer, $2::integer, $3::timestamp, $4::integer)",
             [
                 vehicleId.toString(),
                 renterUserId.toString(),
